@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+	 PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+	 "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+	 
+<mapper namespace="com.example.demo.comment.model.CommentMapper">
+	<resultMap type="com.example.demo.comment.model.Comment" id="Comment">
+		<result column="comment_id" property="comment_id" />
+		<result column="product_id" property="product_id" />
+		<result column="member_id" property="member_id" />
+		<result column="nickname" property="nickname" />
+		<result column="content" property="content" />
+	</resultMap>
+
+	
+	<insert id="cmtInsert" parameterType="com.example.demo.comment.model.Comment">
+		insert into comments(product_id, member_id, content) values(#{product_id}, #{member_id}, #{content}) 
+	</insert>
+	
+	<select id="selectByProID" parameterType="int" resultMap="Comment">
+		select * from comments where product_id = #{product_id} order by comment_id
+	</select>
+	
+	<select id="selectByComID" parameterType="int" resultMap="Comment">
+		select * from comments where comment_id = #{comment_id}
+	</select>
+	
+	<select id="cmt_selectAll" resultMap="Comment" parameterType="int">
+		select * from comments order by comment_id
+	</select>
+	
+	<update id="cmt_update" parameterType="com.example.demo.comment.model.Comment">
+		update comments set content = #{content} where comment_id = #{comment_id} and product_id = #{product_id}
+	</update>
+	
+	<delete id="cmt_delete" parameterType="int">
+		delete from comments where comment_id = #{comment_id}
+	</delete>
+	
+	
+	<!-- 댓글 페이징 -->
+	
+	<select id="getCommentLisT" resultType="com.example.demo.comment.model.Comment" >
+			select 
+				c.comment_id,
+				c.product_id,
+				c.member_id,
+				m.nickname,
+				c.content 
+			from comments c
+			join members m
+			on c.member_id = m.member_id 
+			where product_id = #{product_id}
+     		order by comment_id DESC 
+     		limit #{startRow}, #{perPage} 
+	</select>
+	
+	<select id="getCommentTotal" resultType="Long" parameterType="int">
+			SELECT COUNT(*) FROM comments where product_id = #{product_id } 
+	</select>
+
+
+
+</mapper>

@@ -1,0 +1,138 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.demo.alarm.model.AlarmMapper">
+	<resultMap type="com.example.demo.alarm.model.Alarm" id="alarm">
+		<result property="alarmId" column="alarm_id" />
+		<result property="memberId" column="member_id" />
+		<result property="productId" column="product_id" />
+		<result property="alarmType" column="alarm_type" />
+		<result property="isRead" column="is_read" />
+		<result property="href" column="href" />
+		<result property="createdAt" column="created_at" />
+	</resultMap>
+	
+	<resultMap type="com.example.demo.alarm.model.Deal" id="deal">
+		<result property="dealId" column="deal_id" />
+		<result property="productId" column="product_id" />
+		<result property="category" column="category_name" />
+		<result property="buyerId" column="buyer_id" />
+		<result property="sellerId" column="seller_id" />
+		<result property="title" column="product_title" />
+		<result property="buyerNickname" column="buyer_nickname" />
+		<result property="sellerNickname" column="seller_nickname" />
+		<result property="createdAt" column="create_at" />
+	</resultMap>
+	
+	<select id="findAllAlarm" resultMap="alarm" parameterType="int">      
+        SELECT
+        	a.alarm_id,
+        	a.member_id,
+        	p.product_id,
+        	c.category_name AS category,
+        	p.title,
+        	a.alarm_type,
+        	a.is_read,
+        	a.href,
+        	a.created_at
+        FROM
+        	alarms a
+        JOIN 
+        	products p
+        ON
+        	a.product_id = p.product_id
+        JOIN 
+        	category_1 c
+        ON
+        	p.category1_id = c.category_id
+        WHERE
+        	a.member_id = #{memberId}
+	</select>
+	
+	<select id="findAllDeal" resultMap="deal" parameterType="int">
+		SELECT
+		    fd.deal_id,
+		    p.product_id,
+		    c.category_name,
+		    buyer.member_id AS buyer_id,
+		    seller.member_id AS seller_id,
+		    buyer.nickname AS buyer_nickname,
+		    seller.nickname AS seller_nickname,
+		    p.title AS product_title,
+		    fd.is_read,
+		    fd.create_at
+		FROM 
+			finished_deals fd
+		JOIN 
+			members buyer ON fd.buyer_id = buyer.member_id
+		JOIN 
+			members seller ON fd.seller_id = seller.member_id
+		JOIN 
+			products p ON fd.product_id = p.product_id
+		JOIN 
+			category_1 c ON p.category1_id = c.category_id
+		WHERE 
+			buyer.member_id = #{memberId} OR seller.member_id = #{memberId}
+			AND fd.is_read != 1;
+	</select>
+	
+	<select id="countAlarmsByMemberId" parameterType="int">
+		SELECT
+			COUNT(*)
+		FROM
+			alarms
+		WHERE
+			member_id = #{memberId}
+	</select>
+	
+	<select id="findAllLikedMember" parameterType="int">
+		SELECT member_id FROM like_lists WHERE product_id = #{productId }
+	</select>
+	
+	<select id="findDealById" resultMap="deal" parameterType="int">
+		SELECT * FROM finished_deals WHERE deal_id = #{dealId }
+	</select>
+	
+	<insert id="insertAlarm">
+		INSERT INTO 
+			alarms
+			(
+				product_id,
+				member_id,
+				alarm_type,
+				href
+			)
+		VALUES
+		<foreach collection="likedMembers" item="list" separator="," >
+			(
+				#{productId},
+				#{list},
+				#{type},
+				#{href}
+			)
+		</foreach>
+	</insert>
+	
+	<insert id="updateProductClose">
+		INSERT INTO finished_deals
+			(product_id, buyer_id, seller_id)
+		VALUES
+			(#{productId}, #{buyerId}, #{sellerId})
+	</insert>
+	
+	<delete id="deleteAlarm" parameterType="int">
+		DELETE FROM alarms WHERE alarm_id = #{alarmId}
+	</delete>
+	
+	<update id="updateReadstate" parameterType="com.example.demo.alarm.model.Alarm">
+		UPDATE alarms 
+		SET is_read = #{isRead}
+		WHERE alarm_id = #{alarmId}
+	</update>
+	
+	<update id="updateDealReadState" parameterType="com.example.demo.alarm.model.Deal">
+		UPDATE finished_deals 
+		SET is_read = #{isRead}
+		WHERE deal_id = #{dealId}
+	</update>
+	
+</mapper>

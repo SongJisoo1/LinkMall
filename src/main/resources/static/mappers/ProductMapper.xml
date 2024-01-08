@@ -1,0 +1,243 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.demo.product.model.ProductMapper">
+	
+	<resultMap id="product" type="com.example.demo.product.model.Product">
+		<result property="productId" column="product_id" />
+		<result property="memberId" column="member_id" />
+		<result property="nickname" column="nickname" />
+		<result property="category1" column="category1" />
+		<result property="title" column="title" />
+		<result property="contents" column="contents" />
+		<result property="price" column="price" />
+		<result property="viewCnt" column="view_cnt" />
+		<result property="state" column="state" />
+		<result property="isLiked" column="is_liked" />
+		<result property="likeCnt" column="like_count" />
+		<result property="createdAt" column="created_at" />
+		<result property="updatedAt" column="updated_at" />
+		<collection column="product_id" property="imgs" javaType="java.util.List" ofType="com.example.demo.product.model.ProductImg" select="findImgsById" />
+	</resultMap>
+	
+	<insert id="insertProduct" parameterType="com.example.demo.product.model.Product" useGeneratedKeys="true" keyProperty="productId" keyColumn="product_id">
+		INSERT INTO products
+		            (member_id,
+		             title,
+		             contents,
+		             price,
+		             category1_id)
+		VALUES      (
+					 #{memberId },
+		             #{title },
+		             #{contents },
+		             #{price },
+		             #{category1 }
+		            );
+	</insert>
+	
+	<insert id="insertImgs" parameterType="java.util.List">
+		INSERT INTO product_imgs
+		(
+			product_id,
+			img_name
+		)
+		VALUES
+		(
+		#{productId},
+		#{imgName}
+		)
+	</insert>
+	
+	<!-- 게시글 필터링 조건 -->
+	<sql id="search">
+		<where>
+			<if test="params.keyword != null">
+				<choose>
+					<when test="'title'.equals(params.searchType)">
+						AND p.title LIKE CONCAT("%", #{params.keyword } ,"%")
+					</when>
+					<when test="'seller'.equals(params.searchType)">
+						AND nickname LIKE CONCAT("%", #{params.keyword} ,"%")
+					</when>
+				</choose>
+			</if>
+			<if test="params.category != 0">
+				AND p.category1_id = #{params.category } 
+			</if>
+			<if test="params.title != null">
+				AND p.title LIKE CONCAT("%", #{params.title}, "%" )
+			</if>
+			<if test="params.seller != null">
+				AND m.nickname LIKE CONCAT("%", #{params.seller},"%")
+			</if>
+			<if test="params.lowPrice > 0 and params.highPrice == 0">
+				<![CDATA[ AND p.price >= #{params.lowPrice} ]]>
+			</if>
+			<if test="params.highPrice> 0 and params.lowPrice == 0">
+				<![CDATA[ AND p.price >= #{params.lowPrice} ]]>
+			</if>
+			<if test="params.lowPrice > 0 and params.highPrice > 0">
+				<![CDATA[ AND p.price BETWEEN #{params.lowPrice} AND #{params.highPrice} ]]>
+			</if>
+		</where>                               
+	</sql>
+		
+	<select id="findAllProducts" parameterType="com.example.demo.utils.dto.SearchDto" resultMap="product">
+		SELECT 
+		    m.member_id,
+		    p.product_id,
+		    m.nickname,
+		    p.title,
+		    p.contents,
+		    p.view_cnt,
+		    p.state,
+		    p.price,
+		    p.created_at,
+		    CASE WHEN ll.product_id IS NULL THEN '0' ELSE '1' END AS is_liked,
+		    COALESCE(like_count.count, 0) AS like_count
+		FROM members m
+		JOIN products p ON m.member_id = p.member_id
+		LEFT JOIN like_lists ll ON ll.product_id = p.product_id AND ll.member_id = #{memberId}
+		LEFT JOIN (
+			 SELECT product_id, COUNT(*) AS count
+			 FROM like_lists
+			 GROUP BY product_id
+		) like_count ON like_count.product_id = p.product_id
+		<include refid="search" />
+		ORDER BY p.created_at DESC
+		LIMIT #{params.offset }, #{params.recordSize }
+	</select>
+		
+	<select id="findProductByProductId" parameterType="int" resultMap="product">
+		SELECT 
+			m.member_id,
+		    p.product_id,
+		    m.nickname,
+		    p.title,
+		    p.contents,
+		    p.view_cnt,
+		    p.state,
+		    p.price,
+		    p.created_at,
+		    CASE WHEN ll.product_id IS NULL THEN '0' ELSE '1' END AS is_liked
+		FROM products p
+		JOIN 
+			members m 
+		ON m.member_id = p.member_id
+		LEFT JOIN like_lists ll ON ll.product_id = p.product_id AND ll.member_id = #{memberId}
+		WHERE p.product_id = #{productId }
+	</select>
+	
+	<select id="fintPostsByMemberId" parameterType="int" resultMap="product">
+		SELECT 
+		    m.member_id,
+		    p.product_id,
+		    m.nickname,
+		    p.title,
+		    p.contents,
+		    p.view_cnt,
+		    p.state,
+		    p.price,
+		    p.created_at,
+		    CASE WHEN ll.product_id IS NULL THEN '0' ELSE '1' END AS is_liked,
+		    COALESCE(like_count.count, 0) AS like_count
+		FROM members m
+		JOIN products p ON m.member_id = p.member_id
+		LEFT JOIN like_lists ll ON ll.product_id = p.product_id AND ll.member_id = #{memberId}
+		LEFT JOIN (
+			 SELECT product_id, COUNT(*) AS count
+			 FROM like_lists
+			 GROUP BY product_id
+		) like_count ON like_count.product_id = p.product_id
+		WHERE m.member_id = #{memberId}
+		ORDER BY p.created_at DESC
+		LIMIT #{limitStart}, #{recordSize}
+	</select>
+	
+	<select id="findLikeListByMemberId" parameterType="int" resultMap="product">
+		SELECT m.member_id,
+		       p.product_id,
+		       m.nickname,
+		       p.title,
+		       p.contents,
+		       p.view_cnt,
+		       p.state,
+		       p.price,
+		       p.created_at,
+		       IF(ll.like_id IS NULL, "0", "1") AS is_liked,
+		       (SELECT COUNT(*) FROM like_lists ll WHERE ll.product_id = p.product_id) AS like_count
+		FROM   members m
+			   JOIN like_lists ll
+		         ON m.member_id = ll.member_id
+		       JOIN products p 
+			   	 ON ll.product_id  = p.product_id 
+		WHERE  m.member_id = #{memberId }
+		GROUP BY p.product_id
+		ORDER  BY p.created_at DESC
+		LIMIT #{limitStart }, #{recordSize }		
+	</select>
+	
+	<select id="findImgsById" resultType="com.example.demo.product.model.ProductImg">
+		select
+			img_id AS imgId,
+			img_name AS imgName
+		from
+			product_imgs
+		where product_id = #{product_id }		
+	</select>
+	
+	<select id="countByMemberPosts" parameterType="int" resultType="int">
+		SELECT
+			COUNT(*)
+		FROM
+			products
+		WHERE member_id = #{memberId }
+	</select>
+	
+	<select id="countAllProducts" parameterType="com.example.demo.utils.dto.SearchDto" resultType="int">
+		SELECT
+			COUNT(*)
+		FROM
+			products p
+		JOIN 
+			members m
+		ON p.member_id = m.member_id
+		<include refid="search" />	
+	</select>
+	
+	<update id="incrementViewCnt" parameterType="int">
+		UPDATE
+			products
+		SET
+			view_cnt = view_cnt + 1
+		WHERE 
+			product_id = #{product_id }
+	</update>
+	
+	<select id="countByMemberLikeList" parameterType="int" resultType="int">
+		SELECT
+			COUNT(*)
+		FROM
+			members m
+			JOIN like_lists ll 
+			  ON m.member_id = ll.member_id 
+			JOIN products p 
+			  ON ll.product_id = p.product_id 
+		WHERE m.member_id = #{memberId }
+	</select>
+	
+	<update id="updateState" parameterType="com.example.demo.product.dto.ProductEditDto">
+		UPDATE 
+			products
+		SET
+			state = #{state}
+		WHERE
+			product_id = #{productId}
+	</update>
+	
+	<delete id="deleteProduct">
+		DELETE
+			FROM products
+		WHERE product_id = #{productId }
+	</delete>
+</mapper>

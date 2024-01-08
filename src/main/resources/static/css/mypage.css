@@ -1,0 +1,152 @@
+@charset "UTF-8";
+
+      .my-profile {
+        height: 150px;
+        width: 60%;
+        margin: 50px auto;
+        margin-bottom: 0;
+        border: 1px solid black;
+        border-radius: 15px 15px 0 0;
+        display: flex;
+        align-items: center;
+        justify-content: space-between; /* 버튼을 오른쪽 끝으로 배치 */
+      }
+
+      .my-profile__list {
+        height: 150px;
+        width: 60%;
+        margin: 50px auto;
+      }
+
+      .my-profile__content {
+        flex: 1;
+      }
+
+      .my-profile__img {
+        border-radius: 50%;
+        width: 100px;
+        margin-left: 30px;
+        margin-right: 20px;
+      }
+      .my-profile__nick {
+        font-weight: bold;
+        font-size: 1.5rem;
+        /* flex: 1; 남은 공간을 모두 채우도록 설정합니다. */
+      }
+      .progress {
+        margin-top: 20px; /* progress 바 위 여백을 추가합니다. */
+        width: 300px; /* progress 바를 100%로 설정하여 부모 너비를 채우도록 합니다. */
+      }
+      .my-profile__buttons {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-end;
+      }
+    
+      .my-profile__nav {
+        height: 50px;
+        width: 60%;
+        margin: 50px auto;
+        margin-top: 0;
+        border: 1px solid black;
+        border-top: none;
+        border-radius: 0 0 15px 15px;
+      }
+
+      .my-profile__nav ul.nav {
+        display: flex;
+        margin-left: 20px;
+        /* margin-top: 10px; */
+        /* margin-top: 20px; 아래로 이동 */
+        /* justify-content: center;  */
+        padding: 0; /* 기본 패딩 제거 */
+      }
+
+      .my-profile__nav .nav-item {
+        margin: 0 10px; /* 각 nav-item 사이의 간격 설정 */
+      }
+
+     a {
+        margin-top: 5px;
+        position: relative;
+        color: #a0a0a0;
+        text-decoration: none;
+        font-family: "Poppins", sans-serif;
+        font-size: 18px;
+        letter-spacing: 0.5px;
+        padding: 0 10px;
+      }
+
+      .active {
+        font-weight: bold;
+      }
+
+      .nav-link:after {
+        content: "";
+        position: absolute;
+        background-color: black;
+        height: 3px;
+        width: 0;
+        left: 0;
+        bottom: -5px;
+        transition: 0.3s;
+      }
+
+      .nav-link:hover {
+        color: #ffffff;
+      }
+
+      .nav-link:hover:after,
+      .nav-link.active::after {
+        width: 100%;
+      }
+
+      .card {
+        border-radius: 0px;
+      }
+
+      .card-img-top {
+        /* width: 250px; */
+        /* height: 280px; */
+        /* padding: 30px; */
+        cursor: pointer;
+      }
+
+      .bg-primary {
+        background-color: #fafafa !important;
+      }
+
+      .card-title1 {
+        font-size: 12px !important;
+        color: burlywood !important;
+      }
+
+      .bi {
+        margin-left: 10px !important;
+        font-size: 15px !important;
+        cursor: pointer;
+      }
+      .bi:hover {
+        color: burlywood;
+      }
+      .price {
+        color: burlywood;
+      }
+      
+      .on {
+        background-color: aquamarine;
+        color: white;
+      }
+      
+      .read {
+      	color: black;
+      }
+      
+      .not-read {
+      	color: gray;
+      }
+      
+      .card-img-top {
+      	height: 15rem;
+      	object-fit: cover;
+      }

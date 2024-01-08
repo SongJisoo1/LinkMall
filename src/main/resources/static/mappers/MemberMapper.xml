@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.demo.member.model.MemberMapper">
+	<resultMap type="com.example.demo.member.model.Member" id="member">
+		<result property="memberId" column="member_id" />
+		<result property="loginId" column="login_id" />
+		<result property="password" column="password" />
+		<result property="nickname" column="nickname" />
+		<result property="email" column="email" />
+		<result property="postAddress" column="post_address" />
+		<result property="roadAddress" column="road_address" />
+		<result property="detailAddress" column="detail_address" />
+		<result property="rate" column="rate" />
+		<result property="profileImg" column="profile_img" />
+		<result property="rateCnt" column="rate_cnt" />
+		<result property="role" column="role" />
+		<result property="ban" column="ban" />
+		<result property="createdAt" column="created_at" />
+		<result property="updatedAt" column="updated_at" />
+	</resultMap>
+	
+	<insert id="insertMember" parameterType="com.example.demo.member.model.Member">
+		INSERT INTO members
+            (login_id,
+             password,
+             nickname,
+             email,
+             profile_img,
+             post_address,
+             road_address,
+             detail_address)
+		VALUES      ( #{loginId},
+              		  #{password},
+		              #{nickname},
+		              #{email},
+		              #{profileImg},
+		              #{postAddress},
+		              #{roadAddress},
+		              #{detailAddress}) 
+	</insert>
+	
+	<select id="findMemberByLoginId" resultMap="member" parameterType="String">
+		SELECT *
+		FROM members
+		WHERE login_id = #{loginId}
+	</select>
+	
+	<select id="findMemberByNickname" resultMap="member" parameterType="String">
+		SELECT *
+		FROM members
+		WHERE nickname = #{nickname}
+	</select>
+	
+	<select id="findMemberByMemberId" resultMap="member" parameterType="int">
+		SELECT *
+		FROM members
+		WHERE member_id = #{memberId}
+	</select>
+	
+	<select id="findMemberByNameAndEamil" resultMap="member" parameterType="String">
+		SELECT *
+		FROM members
+		WHERE email = #{email}
+		AND   name = #{name}  
+	</select>
+	
+	<select id="findMemberByEmail" resultMap="member" parameterType="String">
+		SELECT *
+		FROM members
+		WHERE email = #{email }
+	</select>
+	
+	<update id="updateMember" parameterType="com.example.demo.member.model.Member">
+		UPDATE members SET
+			nickname = #{nickname },
+			post_address = #{postAddress },
+            road_address = #{roadAddress },
+            detail_address = #{detailAddress },
+            profile_img = #{profileImg }
+        WHERE login_id = #{loginId};
+	</update>
+	
+	<update id="resetPassword" parameterType="com.example.demo.member.model.Member">
+		UPDATE members SET
+			password = #{password }
+		WHERE login_id = #{loginId }	
+	</update>
+	
+	<update id="lockMemberAccount" parameterType="com.example.demo.member.model.Member">
+		UPDATE members set
+			ban = #{ban}
+		WHERE member_id = #{memberId}
+	</update>
+	
+	<update id="updateReview">
+		UPDATE members set
+			rate = #{rate},
+			rate_cnt = rate_cnt + 1
+		WHERE member_id = #{memberId}	
+	</update>
+	
+
+	
+</mapper>

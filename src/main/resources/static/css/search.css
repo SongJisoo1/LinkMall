@@ -1,0 +1,18 @@
+@charset "UTF-8";
+
+.form {
+   border: 1px solid black;
+   padding: 30px;
+}
+
+.collection-img span {
+   top: 20px;
+   right: 20px;
+   width: 46px;
+   height: 46px;
+   border-radius: 50%;
+}
+
+      .text-primary {
+        color: red !important;
+      }
